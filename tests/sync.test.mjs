@@ -1048,3 +1048,26 @@ test("a write between delta and ID reads stays visible to the next pull", async 
   await engine2.engine.testSync();
   assert.equal((await port.get("tasks", "task-b"))?.title, "During pull");
 });
+
+test("idb: list and count active challenges using boolean filters on a reopened database", async () => {
+  await idbReady();
+  const dbName = "test-challenge-filter-" + crypto.randomUUID();
+  let port = await ports.openIdbPort(dbName);
+  try {
+    for (const [id, active, owner, deleted] of [
+      ["active", true, USER_A, 0], ["inactive", false, USER_A, 0],
+      ["other-owner", true, USER_B, 0], ["deleted", true, USER_A, 1],
+    ]) {
+      await port.put("challenges", { id, owner, is_active: active, _deleted: deleted });
+    }
+    port.close();
+    port = await ports.openIdbPort(dbName);
+    const activeFilter = { eq: { owner: USER_A, is_active: true } };
+    assert.deepEqual((await port.list("challenges", activeFilter)).map(r => r.id), ["active"]);
+    assert.equal(await port.count("challenges", activeFilter), 1);
+    assert.deepEqual((await port.list("challenges", { eq: { is_active: false } })).map(r => r.id), ["inactive"]);
+  } finally {
+    port.close();
+    indexedDB.deleteDatabase(dbName);
+  }
+});

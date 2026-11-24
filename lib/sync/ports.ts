@@ -196,6 +196,12 @@ function applyTombstoneFilter(
   return rows.filter((r) => r._deleted !== 1);
 }
 
+// Our indexed columns use strings and numbers. Other values (including
+// boolean flags and null) are compared by matches() during a store scan.
+function canUseIndexKey(value: unknown): value is string | number {
+  return typeof value === "string" || (typeof value === "number" && !Number.isNaN(value));
+}
+
 /** Pick an index to narrow the scan, and the columns it already covers. */
 function pickIndex(
   store: StoreName,
@@ -213,7 +219,7 @@ function pickIndex(
         if (opts.eq && c in opts.eq) prefix.push((opts.eq as Record<string, unknown>)[c]);
         else break;
       }
-      if (prefix.length === 0) continue;
+      if (prefix.length === 0 || !prefix.every(canUseIndexKey)) continue;
       const covered = new Set(cols.slice(0, prefix.length));
       if (prefix.length === cols.length) {
         const key = prefix.length === 1 ? prefix[0] : prefix;
@@ -226,6 +232,7 @@ function pickIndex(
     const col = cols[0];
     if (opts.eq && col in opts.eq) {
       const key = (opts.eq as Record<string, unknown>)[col];
+      if (!canUseIndexKey(key)) continue;
       return { def, getAll: (idx) => idx.getAll(key), covered: new Set([col]) };
     }
     const lo = opts.gte?.[col] ?? opts.gt?.[col];
@@ -233,6 +240,12 @@ function pickIndex(
     if ((lo !== undefined || hi !== undefined) && IDBKR) {
       const loEx = opts.gte?.[col] === undefined && opts.gt?.[col] !== undefined;
       const hiEx = opts.lte?.[col] === undefined && opts.lt?.[col] !== undefined;
+      if (lo !== undefined && !canUseIndexKey(lo)) continue;
+      if (hi !== undefined && !canUseIndexKey(hi)) continue;
+      if (lo !== undefined && hi !== undefined) {
+        const comparison = indexedDB.cmp(lo, hi);
+        if (comparison > 0 || (comparison === 0 && (loEx || hiEx))) continue;
+      }
       const range =
         lo !== undefined && hi !== undefined
           ? IDBKR.bound(lo, hi, loEx, hiEx)
