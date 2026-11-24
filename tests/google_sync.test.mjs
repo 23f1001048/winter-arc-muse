@@ -154,6 +154,10 @@ class FakeBuilder {
     this._filters.push((r) => r[col] === val);
     return this;
   }
+  gt(col, val) {
+    this._filters.push((r) => r[col] > val);
+    return this;
+  }
   in(col, vals) {
     this._filters.push((r) => vals.includes(r[col]));
     return this;
@@ -1349,4 +1353,26 @@ test("security D3: no NEXT_PUBLIC in the new Google routes", () => {
       `${p} must never read client-exposed env`
     );
   }
+});
+
+test("a truncated local event lookup never deletes the linked Google event", async () => {
+  const store = makeStore();
+  seedConnection(store);
+  const local = seedLocal(store, USER_A);
+  const mapping = seedMapping(store, USER_A, {
+    local_event_id: local.id, google_event_id: "still-exists",
+    origin: "synced", last_synced_at: T2,
+  });
+  const supabase = makeSupabase(store);
+  const from = supabase.from;
+  supabase.from = (table) => {
+    const query = from(table);
+    if (table === "calendar_events") query.in = () => query.limit(0);
+    return query;
+  };
+  const google = makeGoogle();
+  google.onList(() => jsonRes(200, { items: [], nextSyncToken: "next" }));
+  await runGoogleSync({ supabase, userId: USER_A, timeZone: "UTC", fetchImpl: google.fetchImpl });
+  assert.equal(mapping.local_event_id, local.id);
+  assert.equal(google.calls.some((call) => call.method === "DELETE"), false);
 });

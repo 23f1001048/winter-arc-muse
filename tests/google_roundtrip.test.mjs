@@ -114,6 +114,10 @@ class FakeBuilder {
     this._filters.push((r) => r[col] === val);
     return this;
   }
+  gt(col, val) {
+    this._filters.push((r) => r[col] > val);
+    return this;
+  }
   in(col, vals) {
     this._filters.push((r) => vals.includes(r[col]));
     return this;
