@@ -1,0 +1,22 @@
+name: Repository checks
+on: [push]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+        if: success() || failure()
+      - run: npm run lint
+        if: success() || failure()
+      - run: npm test
+        if: success() || failure()
+      - run: npm run build
+        if: success() || failure()
