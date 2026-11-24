@@ -9,6 +9,9 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthPage = path === "/login" || path === "/signup";
 
+  // The confirmation handler exchanges the code for the user's first session.
+  if (path === "/auth/callback") return NextResponse.next({ request });
+
   // No Supabase keys configured yet (fresh clone, .env.local missing):
   // degrade gracefully instead of 500ing. Auth pages render; everything
   // else goes to /login where the real error surfaces on submit.
