@@ -724,12 +724,14 @@ async function readPushMappings(
 ): Promise<EventMappingRow[]> {
   const rows: EventMappingRow[] = [];
   for (;;) {
-    let query = supabase.from("google_event_mappings").select("*").eq("owner", userId)
+    const query = supabase.from("google_event_mappings").select("*").eq("owner", userId)
       .order("id").limit(500);
-    query = tombstones
-      ? query.eq("origin", "synced").is("local_event_id", null).not("google_event_id", "is", null)
-      : query.not("local_event_id", "is", null);
-    if (rows.length) query = query.gt("id", rows[rows.length - 1].id);
+    if (tombstones) {
+      query.eq("origin", "synced").is("local_event_id", null).not("google_event_id", "is", null);
+    } else {
+      query.not("local_event_id", "is", null);
+    }
+    if (rows.length) query.gt("id", rows[rows.length - 1].id);
     const { data, error } = await query;
     if (error || !data) throw new Error("Could not load Google event mappings.");
     if (!data.length) return rows;
