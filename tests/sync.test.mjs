@@ -995,3 +995,56 @@ test("dates: insert timestamps are honest ISO and survive the write path", async
   const local = await db.get("tasks", row.id);
   assert.equal(local?.created_at, row._local_created_at, "absorbed back locally");
 });
+
+test("remote pull reads past API caps and identical update timestamps", async () => {
+  const timestamp = "2026-10-05T10:00:00.000Z";
+  const records = ["a", "b", "c"].map((id) => ({ id, updated_at: timestamp }));
+  const client = {
+    from() {
+      let rows = records;
+      const query = {
+        select() { return query; },
+        order() { return query; },
+        limit() { return query; },
+        gt(key, value) { rows = rows.filter((row) => row[key] > value); return query; },
+        or(filter) {
+          const after = filter.match(/id\.gt\.([abc])\)$/)?.[1];
+          assert.ok(after);
+          assert.equal(filter, `updated_at.gt.${timestamp},and(updated_at.eq.${timestamp},id.gt.${after})`);
+          rows = rows.filter((row) => row.id > after);
+          return query;
+        },
+        then(resolve, reject) {
+          return Promise.resolve({ data: rows.slice(0, 2), error: null }).then(resolve, reject);
+        },
+      };
+      return query;
+    },
+  };
+  const table = new remote2.SupabaseRemote(() => client).table("tasks");
+  assert.deepEqual(await table.selectDelta(null), records);
+  assert.deepEqual(await table.listIds(), records);
+});
+
+test("a write between delta and ID reads stays visible to the next pull", async () => {
+  const { remote, port } = setup();
+  const table = remote.table("tasks");
+  await table.insert({ id: "task-a", owner: USER_A, title: "Before" });
+  const originalTable = remote.table.bind(remote);
+  let inserted = false;
+  remote.table = (name) => {
+    const api = originalTable(name);
+    if (name !== "tasks") return api;
+    return { ...api, async listIds() {
+      if (!inserted) {
+        inserted = true;
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        await table.insert({ id: "task-b", owner: USER_A, title: "During pull" });
+      }
+      return api.listIds();
+    }};
+  };
+  await engine2.engine.testSync();
+  await engine2.engine.testSync();
+  assert.equal((await port.get("tasks", "task-b"))?.title, "During pull");
+});

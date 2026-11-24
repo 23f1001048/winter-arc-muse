@@ -36,7 +36,7 @@ self.addEventListener("activate", (event) => {
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((key) => key !== STATIC_CACHE && key !== SHELL_CACHE)
+          .filter((key) => key.startsWith("winter-arc-") && key !== STATIC_CACHE && key !== SHELL_CACHE)
           .map((key) => caches.delete(key))
       );
       await self.clients.claim();
@@ -90,7 +90,7 @@ self.addEventListener("fetch", (event) => {
         (hit) =>
           hit ||
           fetch(request).then((response) => {
-            if (response && response.ok) {
+            if (response && response.ok && !response.redirected) {
               const copy = response.clone();
               caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy));
             }
@@ -110,7 +110,7 @@ self.addEventListener("fetch", (event) => {
     (async () => {
       try {
         const response = await fetchWithTimeout(request, NAV_TIMEOUT_MS);
-        if (response && response.ok) {
+        if (response && response.ok && !response.redirected) {
           const copy = response.clone();
           // Fire-and-forget cache update; the network response wins this load.
           caches.open(SHELL_CACHE).then((cache) => cache.put(request, copy));

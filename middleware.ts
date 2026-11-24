@@ -19,6 +19,9 @@ export async function middleware(request: NextRequest) {
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
+    if (path.startsWith("/api/")) {
+      return NextResponse.json({ error: "Authentication is unavailable." }, { status: 503 });
+    }
     if (!isAuthPage && path !== "/") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -51,7 +54,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
   // No session (or auth lookup failed) -> guests can only see auth pages.
-  if (!user && !isAuthPage && path !== "/") {
+  if (!user && !isAuthPage && path !== "/" && !path.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   if (user && (isAuthPage || path === "/")) {

@@ -106,19 +106,33 @@ export class SupabaseRemote implements Remote {
     const q = () => client.from(name);
     return {
       async selectDelta(since: string | null) {
-        let query = q().select("*").order("updated_at", { ascending: true });
-        if (since) query = query.gt("updated_at", since);
-        const { data, error } = await query;
-        if (error) throw error;
-        return data ?? [];
+        const rows: Record<string, any>[] = [];
+        for (;;) {
+          let query = q().select("*").order("updated_at").order("id").limit(500);
+          const last = rows[rows.length - 1];
+          if (last) {
+            query = query.or(
+              `updated_at.gt.${last.updated_at},and(updated_at.eq.${last.updated_at},id.gt.${last.id})`
+            );
+          } else if (since) {
+            query = query.gt("updated_at", since);
+          }
+          const { data, error } = await query;
+          if (error) throw error;
+          if (!data?.length) return rows;
+          rows.push(...data);
+        }
       },
       async listIds() {
-        const { data, error } = await q().select("id,updated_at");
-        if (error) throw error;
-        return (data ?? []).map((r: any) => ({
-          id: String(r.id),
-          updated_at: String(r.updated_at),
-        }));
+        const rows: Array<{ id: string; updated_at: string }> = [];
+        for (;;) {
+          let query = q().select("id,updated_at").order("id").limit(500);
+          if (rows.length) query = query.gt("id", rows[rows.length - 1].id);
+          const { data, error } = await query;
+          if (error) throw error;
+          if (!data?.length) return rows;
+          rows.push(...data);
+        }
       },
       async getById(id: string) {
         const { data, error } = await q().select("*").eq("id", id).maybeSingle();

@@ -7,26 +7,9 @@
  * `getUser()` (network round-trip), so the offline experience keeps working
  * with no connectivity.
  */
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient as browserClient } from "../supabase/client";
 
-function env(name: string): string {
-  return process.env[name] ?? "";
-}
-
-type BrowserClient = ReturnType<typeof createBrowserClient>;
-
-let shared: BrowserClient | null = null;
-
-/** Stable per-tab browser client for auth-state subscription. Client-only. */
-export function browserClient(): BrowserClient {
-  if (!shared) {
-    shared = createBrowserClient(
-      env("NEXT_PUBLIC_SUPABASE_URL"),
-      env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    );
-  }
-  return shared;
-}
+export { browserClient };
 
 /**
  * Resolve the current user id from the locally stored session.
