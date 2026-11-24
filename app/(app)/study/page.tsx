@@ -60,7 +60,7 @@ export default function StudyPage() {
       <section aria-label="Study timer">
         <h2 className="section-title mb-2">Timer</h2>
         <div className="surface card-pad">
-          <StudyTimer subjects={subjects} topics={topics} onSaved={data.refresh} />
+          <StudyTimer key={subjects[0]?.owner ?? "empty"} subjects={subjects} topics={topics} onSaved={data.refresh} />
         </div>
       </section>
 

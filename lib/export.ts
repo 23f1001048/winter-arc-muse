@@ -137,16 +137,23 @@ export async function buildUserExport(
       data[spec.table] = [];
       continue;
     }
-    const { data: rows, error } = await supabase
-      .from(spec.table)
-      .select(spec.columns ?? "*")
-      .eq(spec.ownerColumn, userId);
-    if (error || !rows) {
-      // Server log only — the client receives a generic failure (see route).
-      console.error(`[export] failed to read table ${spec.table}`, error);
-      throw new Error("Failed to build the user data export.");
+    const records: Record<string, unknown>[] = [];
+    let after: string | undefined;
+    for (;;) {
+      let query = supabase.from(spec.table).select(spec.columns ?? "*")
+        .eq(spec.ownerColumn, userId).order("id").limit(500);
+      if (after) query = query.gt("id", after);
+      const { data: rows, error } = await query;
+      if (error || !rows) {
+        console.error(`[export] failed to read table ${spec.table}`, error);
+        throw new Error("Failed to build the user data export.");
+      }
+      if (!rows.length) break;
+      const page = rows as unknown as Record<string, unknown>[];
+      records.push(...page);
+      after = String(page[page.length - 1].id);
     }
-    data[spec.table] = rows as unknown as Record<string, unknown>[];
+    data[spec.table] = records;
   }
 
   return {

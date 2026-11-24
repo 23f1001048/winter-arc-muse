@@ -39,7 +39,7 @@ export function WeekView({
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {days.map((d, i) => {
           const items = data.tasks.filter((t) => t.task_date === d).length +
-            data.events.filter((e) => e.event_date === d).length;
+            data.events.filter((e) => eventCoversDate(e, d)).length;
           const scheduled = training
             ? scheduledWorkoutForDate(training.schedule, training.workouts, d)
             : null;

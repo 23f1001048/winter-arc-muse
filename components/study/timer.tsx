@@ -17,9 +17,9 @@ interface PersistedTimer {
   accumulatedMs: number; // completed segments
 }
 
-function loadPersisted(): PersistedTimer | null {
+function loadPersisted(key: string): PersistedTimer | null {
   try {
-    const raw = localStorage.getItem(TIMER_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as PersistedTimer) : null;
   } catch {
     return null;
@@ -49,15 +49,30 @@ export function StudyTimer({
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // rehydrate on mount
+  const owner = subjects[0]?.owner;
+  const storageKey = owner ? `${TIMER_KEY}:${owner}` : null;
+  const initialSubjects = useRef(subjects);
+
+  // Reclaim an older timer only when the signed-in account owns its subject.
   useEffect(() => {
-    const t = loadPersisted();
+    if (!storageKey) return;
+    let t = loadPersisted(storageKey);
+    if (!t) {
+      const legacy = loadPersisted(TIMER_KEY);
+      if (legacy && initialSubjects.current.some((subject) => subject.id === legacy.subjectId)) {
+        t = legacy;
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(t));
+          localStorage.removeItem(TIMER_KEY);
+        } catch { /* Retain the original timer when storage is unavailable. */ }
+      }
+    }
     if (t) {
       setTimer(t);
       setSubjectId(t.subjectId);
       setTopicId(t.topicId ?? "");
     }
-  }, []);
+  }, [storageKey]);
 
   const running = timer !== null && timer.runStart !== null;
 
@@ -84,8 +99,9 @@ export function StudyTimer({
   function persist(t: PersistedTimer | null) {
     setTimer(t);
     try {
-      if (t) localStorage.setItem(TIMER_KEY, JSON.stringify(t));
-      else localStorage.removeItem(TIMER_KEY);
+      if (!storageKey) return;
+      if (t) localStorage.setItem(storageKey, JSON.stringify(t));
+      else localStorage.removeItem(storageKey);
     } catch {
       /* storage unavailable — timer still works in-memory */
     }

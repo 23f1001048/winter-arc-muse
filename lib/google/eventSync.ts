@@ -113,6 +113,7 @@ const EPOCH_ISO = "1970-01-01T00:00:00.000Z";
 
 /** Row shapes for the 0010/0011 sync tables (owner RLS on all of them). */
 interface EventMappingRow {
+  id: string;
   owner: string;
   local_event_id: string | null;
   google_account_id: string;
@@ -304,12 +305,13 @@ async function loadLocalEvent(
   userId: string,
   localEventId: string
 ): Promise<CalendarEventRow | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("calendar_events")
     .select("*")
     .eq("id", localEventId)
     .eq("owner", userId)
     .maybeSingle();
+  if (error) throw new Error("Could not read the linked calendar event.");
   return (data ?? null) as CalendarEventRow | null;
 }
 
@@ -367,11 +369,12 @@ async function handleGoogleDeleted(
   const untouched =
     !mapping.last_synced_at || local.updated_at <= mapping.last_synced_at;
   if (untouched) {
-    await supabase
+    const { error } = await supabase
       .from("calendar_events")
       .delete()
       .eq("id", local.id)
       .eq("owner", userId);
+    if (error) throw new Error("Could not delete the local calendar event.");
     await clearMappingLink(supabase, userId, mapping);
     result.deleted++;
   } else {
@@ -441,13 +444,14 @@ async function applyGoogleItem(
 ): Promise<void> {
   const googleEventId = item.id as string;
 
-  const { data: mappingRow } = await supabase
+  const { data: mappingRow, error: mappingError } = await supabase
     .from("google_event_mappings")
     .select("*")
     .eq("owner", userId)
     .eq("google_calendar_id", calendarId)
     .eq("google_event_id", googleEventId)
     .maybeSingle();
+  if (mappingError) throw new Error("Could not read the Google event mapping.");
   const mapping = (mappingRow ?? null) as EventMappingRow | null;
 
   if (item.status === "cancelled") {
@@ -713,6 +717,28 @@ function resolvePushZone(
   };
 }
 
+async function readPushMappings(
+  supabase: SupabaseClient,
+  userId: string,
+  tombstones: boolean
+): Promise<EventMappingRow[]> {
+  const rows: EventMappingRow[] = [];
+  for (;;) {
+    const query = supabase.from("google_event_mappings").select("*").eq("owner", userId)
+      .order("id").limit(500);
+    if (tombstones) {
+      query.eq("origin", "synced").is("local_event_id", null).not("google_event_id", "is", null);
+    } else {
+      query.not("local_event_id", "is", null);
+    }
+    if (rows.length) query.gt("id", rows[rows.length - 1].id);
+    const { data, error } = await query;
+    if (error || !data) throw new Error("Could not load Google event mappings.");
+    if (!data.length) return rows;
+    rows.push(...data as EventMappingRow[]);
+  }
+}
+
 /**
  * App -> Google push phase. Only runs when the connection granted the
  * calendar.events scope. Per-mapping errors are recorded as conflicts so one
@@ -738,32 +764,21 @@ async function pushLocalChanges(
   /** Google items seen in this sync's pull phase, keyed `${calendarId}\n${googleEventId}`. */
   pulledItems: Map<string, GoogleApiEvent>
 ): Promise<void> {
-  const { data: mappingRows } = await supabase
-    .from("google_event_mappings")
-    .select("*")
-    .eq("owner", userId)
-    .not("local_event_id", "is", null);
-  const mappings = ((mappingRows ?? []) as EventMappingRow[]).filter(
-    (m) => m.local_event_id
-  );
-
-  const localIds = [
-    ...new Set(mappings.map((m) => m.local_event_id as string)),
-  ];
-  const { data: eventRows } = localIds.length > 0
-    ? await supabase
-        .from("calendar_events")
-        .select("*")
-        .eq("owner", userId)
-        .in("id", localIds)
-    : { data: [] as CalendarEventRow[] };
-  const localById = new Map(
-    ((eventRows ?? []) as CalendarEventRow[]).map((e) => [e.id, e])
-  );
+  const mappings = await readPushMappings(supabase, userId, false);
+  const localIds = [...new Set(mappings.map((m) => m.local_event_id as string))];
+  const localById = new Map<string, CalendarEventRow>();
+  // Bound the URL size of the PostgREST IN filter.
+  for (let start = 0; start < localIds.length; start += 50) {
+    const { data, error } = await supabase.from("calendar_events").select("*")
+      .eq("owner", userId).in("id", localIds.slice(start, start + 50));
+    if (error || !data) throw new Error("Could not load linked calendar events.");
+    for (const row of data as CalendarEventRow[]) localById.set(row.id, row);
+  }
 
   for (const mapping of mappings) {
     const localEventId = mapping.local_event_id as string;
-    const local = localById.get(localEventId) ?? null;
+    // A capped batch response is not proof that the user deleted the event.
+    const local = localById.get(localEventId) ?? await loadLocalEvent(supabase, userId, localEventId);
     try {
       if (!local) {
         // Local row deleted by the user: tombstone the mapping so the
@@ -889,14 +904,8 @@ async function pushLocalChanges(
   // was pushed — delete the Google copy, then drop the mapping row.
   // (origin "google" tombstones are the user's real Google events: never
   // deleted.)
-  const { data: tombRows } = await supabase
-    .from("google_event_mappings")
-    .select("*")
-    .eq("owner", userId)
-    .eq("origin", "synced")
-    .is("local_event_id", null)
-    .not("google_event_id", "is", null);
-  for (const row of ((tombRows ?? []) as EventMappingRow[])) {
+  const tombRows = await readPushMappings(supabase, userId, true);
+  for (const row of tombRows) {
     try {
       if (row.google_event_id) {
         await deleteEvent(

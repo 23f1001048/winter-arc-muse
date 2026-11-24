@@ -107,7 +107,8 @@ class SyncEngine {
   private heartbeatTimer: number | null = null;
   private switching: Promise<void> | null = null;
   private listeners = new Set<() => void>();
-  private readyWaiters: Array<() => void> = [];
+  private authSubscription: { unsubscribe(): void } | null = null;
+  private readyWaiters: Array<(error?: Error) => void> = [];
   private snap: SyncSnapshot = freshSnapshot();
   private remoteOverride: Remote | null = null;
   private supabaseRemote: SupabaseRemote | null = null;
@@ -141,16 +142,19 @@ class SyncEngine {
 
   /** Resolves once a per-user DB is open (first auth + initial pull). */
   whenReady(): Promise<void> {
+    if (this.switching) return this.switching.then(() => {
+      if (!this.port) throw new Error("Local database is unavailable.");
+    });
     if (this.port && this.userId) return Promise.resolve();
-    return new Promise((res) => {
-      this.readyWaiters.push(res);
+    return new Promise((resolve, reject) => {
+      this.readyWaiters.push((error) => error ? reject(error) : resolve());
     });
   }
 
-  private flushReady(): void {
+  private flushReady(error?: Error): void {
     const w = this.readyWaiters;
     this.readyWaiters = [];
-    for (const fn of w) fn();
+    for (const fn of w) fn(error);
   }
 
   private remote(): Remote {
@@ -175,9 +179,10 @@ class SyncEngine {
       kick: () => this.kick(),
     });
     try {
-      browserClient().auth.onAuthStateChange((_event, session) => {
+      const { data } = browserClient().auth.onAuthStateChange((_event, session) => {
         void this.onAuthEvent(session?.user?.id ?? null);
       });
+      this.authSubscription = data.subscription;
     } catch {
       /* auth unavailable (e.g. missing env keys): stay inert */
     }
@@ -195,6 +200,8 @@ class SyncEngine {
   }
 
   stop(): void {
+    this.authSubscription?.unsubscribe();
+    this.authSubscription = null;
     this.started = false;
     if (typeof window !== "undefined") {
       window.removeEventListener("online", this.onOnline);
@@ -296,6 +303,7 @@ class SyncEngine {
       this.port = await openIdbPort(DB_NAME_PREFIX + uid);
     } catch {
       this.port = null;
+      this.flushReady(new Error("Local database is unavailable."));
       return;
     }
     await this.resetInflightMutations(this.port);
@@ -871,7 +879,7 @@ class SyncEngine {
 
   private async pullTable(table: TableName): Promise<void> {
     const port = this.port!;
-    const lastPull = await this.metaGet(`last_pull:${table}`);
+    const lastPull = await this.metaGet(`last_pull_v2:${table}`);
     const R = this.remote().table(table);
     let deltas: Record<string, any>[];
     let idRows: Array<{ id: string; updated_at: string }>;
@@ -890,9 +898,6 @@ class SyncEngine {
     // Skew-safe watermark: max updated_at actually seen.
     let watermark = lastPull ?? "";
     for (const r of deltas) {
-      if (r.updated_at && r.updated_at > watermark) watermark = r.updated_at;
-    }
-    for (const r of idRows) {
       if (r.updated_at && r.updated_at > watermark) watermark = r.updated_at;
     }
     for (const row of deltas) {
@@ -925,7 +930,7 @@ class SyncEngine {
         await port.remove(table, local.id);
       }
     }
-    if (watermark) await this.metaPut(`last_pull:${table}`, watermark);
+    if (watermark) await this.metaPut(`last_pull_v2:${table}`, watermark);
   }
 
   // ------------------------------------------------------------------ meta

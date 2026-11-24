@@ -15,7 +15,7 @@ const B = "22222222-2222-2222-2222-222222222222";
 
 // Minimal mock of the Supabase query builder used by buildUserExport.
 // Respects the select() column list so secret-column exclusion is tested.
-function mockSupabase(tables) {
+function mockSupabase(tables, cap = 500) {
   return {
     from(table) {
       const rows = tables[table] ?? [];
@@ -32,7 +32,18 @@ function mockSupabase(tables) {
                 .map((r) =>
                   wanted ? Object.fromEntries(wanted.map((c) => [c, r[c]])) : r
                 );
-              return Promise.resolve({ data: filtered, error: null });
+              const query = {
+                order() { return query; },
+                limit() { return query; },
+                gt(_, id) { return Promise.resolve(page(id)); },
+                then(resolve, reject) { return Promise.resolve(page("")).then(resolve, reject); },
+              };
+              function page(after) {
+                const data = filtered.filter((r) => r.id > after)
+                  .sort((a, b) => a.id < b.id ? -1 : 1).slice(0, cap);
+                return { data, error: null };
+              }
+              return query;
             },
           };
         },
@@ -48,10 +59,7 @@ function failingSupabase() {
         select() {
           return {
             eq() {
-              return Promise.resolve({
-                data: null,
-                error: new Error("db down"),
-              });
+              return { order: () => ({ limit: () => Promise.resolve({ data: null, error: new Error("db down") }) }) };
             },
           };
         },
@@ -169,4 +177,11 @@ test("EXPORT: database errors become a generic failure", async () => {
     buildUserExport(failingSupabase(), A),
     /Failed to build the user data export/
   );
+});
+
+
+test("EXPORT: fetches every row even when the API caps a page below the requested size", async () => {
+  const tasks = ["c", "a", "b"].map((id) => ({ id, owner: A }));
+  const payload = await buildUserExport(mockSupabase({ tasks }, 2), A);
+  assert.deepEqual(payload.data.tasks.map((row) => row.id), ["a", "b", "c"]);
 });
