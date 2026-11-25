@@ -42,6 +42,12 @@ export function ReflectionSection({
   range: { start: string; end: string };
   initialDate?: string | null;
 }) {
+  useEffect(() => {
+    const target = window.location.hash.slice(1);
+    if (target === "daily-reflection" || target === "challenge-review") {
+      document.getElementById(target)?.scrollIntoView();
+    }
+  }, []);
   const today = todayKey();
   const [selectedDate, setSelectedDate] = useState(
     initialDate && /^\d{4}-\d{2}-\d{2}$/.test(initialDate) ? initialDate : today
@@ -200,7 +206,7 @@ export function ReflectionSection({
       </section>
 
       {/* entry + daily review for the selected date */}
-      <section aria-label="Entry for selected date">
+      <section id="daily-reflection" aria-label="Entry for selected date">
         <h3 className="section-title mb-2">
           {formatLong(selectedDate)}
           {selectedDate === today && <span className="t-faint"> · today</span>}
@@ -271,7 +277,7 @@ export function ReflectionSection({
       </section>
 
       {/* 30-day review */}
-      <section aria-label="30-day review">
+      <section id="challenge-review" aria-label="30-day review">
         <h3 className="section-title mb-2">30-day review</h3>
         {challengeLoading ? (
           <LoadingBlock label="Loading challenge…" />

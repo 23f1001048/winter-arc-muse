@@ -11,7 +11,7 @@ import type { ResolvedPhase } from "@/lib/phases";
  * "Done"), never color alone. No percentages, no scores — a phase is
  * past/current/upcoming purely from the challenge dates.
  */
-export function PhaseOverview({ phases }: { phases: ResolvedPhase[] }) {
+export function PhaseOverview({ phases, onSelect }: { phases: ResolvedPhase[]; onSelect: (date: string) => void }) {
   return (
     <div
       className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2"
@@ -44,13 +44,17 @@ export function PhaseOverview({ phases }: { phases: ResolvedPhase[] }) {
           <p className="text-[11px] t-faint mt-0.5">
             {formatShort(p.startDate)} – {formatShort(p.endDate)}
           </p>
+          <p className="text-xs t-secondary mt-1">{p.def.description}</p>
           <p className="text-[11px] font-medium t-secondary mt-1">
             {p.state === "current"
               ? "Current"
               : p.state === "past"
-                ? "✓ Done"
+                ? "Past"
                 : "Upcoming"}
           </p>
+          <button type="button" className="btn-ghost mt-1" onClick={() => onSelect(p.startDate)}>
+            Open day {p.def.startDay}
+          </button>
         </div>
       ))}
     </div>

@@ -48,8 +48,8 @@ const REFLECT: {
   },
   {
     key: "review_adjustment",
-    label: "What will you do differently next?",
-    placeholder: "One concrete change.",
+    label: "What is your plan for day 31?",
+    placeholder: "After ___, I will ___. On a hard day, I will ___.",
   },
 ];
 

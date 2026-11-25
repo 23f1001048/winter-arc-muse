@@ -243,8 +243,7 @@ export function OnboardingFlow() {
               The 30-day structure
             </h1>
             <p className="text-sm t-secondary mt-2">
-              Four phases give the month a shape. They describe where you are —
-              they never score you.
+              Choose one habit to practice through the month. Open Calendar each day for a small action, then log what you did.
             </p>
             <ol className="mt-6 flex flex-col gap-3">
               {CHALLENGE_PHASES.map((p, i) => (
@@ -502,7 +501,7 @@ export function OnboardingFlow() {
                 <div>
                   <p className="label">Phases</p>
                   <p className="t-primary font-medium">
-                    Stabilize → Build → Discipline → Identity
+                    Choose a cue → Repeat → Practice a backup → Plan day 31
                   </p>
                 </div>
               )}
