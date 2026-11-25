@@ -1,0 +1,33 @@
+name: Guided challenge verification
+on: [push]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: fixture-public-key
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Check phone and desktop flows with local fixture data
+        run: |
+          npm install --prefix "$RUNNER_TEMP/journal-browser" playwright@1.56.1 --no-audit --no-fund
+          npm start -- -H 127.0.0.1 > "$RUNNER_TEMP/journal-server.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/login -o /dev/null && break; sleep 1; done
+          NODE_PATH="$RUNNER_TEMP/journal-browser/node_modules" node .github/journal-smoke.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: journal-screens
+          path: journal-screens/
