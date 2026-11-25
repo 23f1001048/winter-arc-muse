@@ -185,11 +185,11 @@ export function BooksPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-3">
+      <div className="journal-heading flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="page-title">Books</h1>
           <p className="page-sub">
-            Your reading shelf — titles, progress, and history.
+            {books.length} {books.length === 1 ? "book" : "books"} on your shelf
           </p>
         </div>
         <button className="btn-primary shrink-0" onClick={() => setBookModal({})}>

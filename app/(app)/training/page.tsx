@@ -51,10 +51,10 @@ export default function TrainingPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="journal-heading flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="page-title">Training</h1>
-          <p className="page-sub">What to train, what you did, how you progress.</p>
+          <p className="page-sub">{todaysWorkout ? `Scheduled today: ${todaysWorkout.name}` : "No workout scheduled today"}</p>
         </div>
         <button className="btn-primary shrink-0" onClick={() => setAddingWorkout(true)}>
           + Workout

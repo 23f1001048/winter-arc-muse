@@ -85,7 +85,7 @@ export function DayView({
   return (
     <div className="flex flex-col gap-4">
       {/* header */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="page-title">{formatLong(dateKey)}</h2>
           <p className="page-sub">
@@ -105,9 +105,15 @@ export function DayView({
         </div>
       </div>
 
+      <nav aria-label="Jump within this day" className="day-shortcuts">
+        <a href="#day-timeline">Schedule <span>{dayEvents.length + dayAllDay.length + dayTasks.length}</span></a>
+        <a href="#day-habits">Habits <span>{doneCount}/{habits.length}</span></a>
+        {isToday(dateKey) && <a href="#quick-actions">Quick log ↓</a>}
+      </nav>
+
       {/* all-day events (V4.5): date-level, above the timed timeline */}
       {dayAllDay.length > 0 && (
-        <section aria-label="All-day events">
+        <section id="day-timeline" aria-label="All-day events">
           <h3 className="section-title mb-2">All-day</h3>
           <div className="surface card-pad flex flex-col gap-1">
             {dayAllDay.map((e) => {
@@ -120,7 +126,7 @@ export function DayView({
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
                   <span
-                    className="w-1 self-stretch rounded-full bg-[#7C8CF8]"
+                    className="w-1 self-stretch rounded-full bg-brand"
                     aria-hidden
                   />
                   <span className="text-sm t-primary flex-1 flex items-center gap-1.5 min-w-0">
@@ -151,7 +157,7 @@ export function DayView({
       )}
 
       {/* timeline */}
-      <section aria-label="Timeline">
+      <section id={dayAllDay.length ? undefined : "day-timeline"} aria-label="Timeline">
         <h3 className="section-title mb-2">Timeline</h3>
         {dayAllDay.length === 0 && dayEvents.length === 0 && dayTasks.length === 0 ? (
           <EmptyState
@@ -174,7 +180,7 @@ export function DayView({
                 <span className="text-xs t-faint w-24 shrink-0 tabular-nums">
                   {timeLabel(e.start_time)}–{timeLabel(e.end_time)}
                 </span>
-                <span className="w-1 self-stretch rounded-full bg-[#7C8CF8]" aria-hidden />
+                <span className="w-1 self-stretch rounded-full bg-brand" aria-hidden />
                 <span className="text-sm t-primary flex-1 flex items-center gap-1.5 min-w-0">
                   <span className="truncate">{e.title}</span>
                   {e.isGoogleSynced && (
@@ -205,8 +211,8 @@ export function DayView({
                   aria-label={t.state === "done" ? "Mark as planned" : "Mark as done"}
                   className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-colors touch-manipulation ${
                     t.state === "done"
-                      ? "bg-[#5A6AE0] border-[#5A6AE0] text-white"
-                      : "hairline t-faint hover:border-[#7C8CF8]"
+                      ? "bg-brand border-brand text-on-brand"
+                      : "hairline t-faint hover:border-brand"
                   }`}
                 >
                   {t.state === "done" && <span className="text-sm">✓</span>}
@@ -262,9 +268,9 @@ export function DayView({
           <h3 className="section-title mb-2">Training</h3>
           <Link
             href="/training"
-            className="surface card-pad flex items-center gap-3 hover:border-[#7C8CF8]/50 transition-colors"
+            className="surface card-pad flex items-center gap-3 hover:border-brand/50 transition-colors"
           >
-            <span className="w-1 self-stretch rounded-full bg-[#7C8CF8]" aria-hidden />
+            <span className="w-1 self-stretch rounded-full bg-brand" aria-hidden />
             <span className="flex-1 min-w-0">
               <span className="block text-sm font-medium t-primary">
                 {scheduled.name}
@@ -279,7 +285,7 @@ export function DayView({
       )}
 
       {/* habits */}
-      <section aria-label="Habits">
+      <section id="day-habits" aria-label="Habits">
         <h3 className="section-title mb-2">Habits</h3>
         {habits.length === 0 ? (
           <EmptyState

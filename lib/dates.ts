@@ -40,6 +40,20 @@ export function parseDayKey(key: string): Date {
   return new Date(key + "T00:00:00");
 }
 
+export function validDayKey(key: string | null): key is string {
+  return key !== null && /^\d{4}-\d{2}-\d{2}$/.test(key) && toDayKey(parseDayKey(key)) === key;
+}
+
+export function addMonthsClamped(key: string, amount: number): string {
+  const date = parseDayKey(key);
+  const day = date.getDate();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + amount);
+  const last = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(day, last));
+  return toDayKey(date);
+}
+
 export function formatLong(key: string): string {
   return parseDayKey(key).toLocaleDateString(undefined, {
     weekday: "long",

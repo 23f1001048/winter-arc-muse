@@ -43,7 +43,7 @@ function Toggle({
       <input
         id={id}
         type="checkbox"
-        className="h-5 w-5 shrink-0 accent-[#5A6AE0]"
+        className="h-5 w-5 shrink-0 accent-brand"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
@@ -156,7 +156,7 @@ export function OnboardingFlow() {
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-8 md:py-12">
       {/* Step indicator: plain text, never a gamified progress bar. */}
-      <p className="text-xs t-secondary mb-2" aria-live="polite">
+      <p className="challenge-caption text-brand mb-4" aria-live="polite">
         Step {step + 1} of {STEPS.length} · {STEPS[step]}
       </p>
 
@@ -167,12 +167,12 @@ export function OnboardingFlow() {
               id="ob-welcome"
               ref={headingRef}
               tabIndex={-1}
-              className="text-3xl font-semibold t-primary outline-none"
+              className="display-title outline-none"
             >
               Winter Arc
             </h1>
             <p className="mt-2 text-lg t-secondary">
-              30 days. One system. Show up every day.
+              Set up your 30-day training journal.
             </p>
             <div className="surface card-pad mt-6">
               <p className="text-sm t-primary leading-relaxed">
@@ -195,7 +195,7 @@ export function OnboardingFlow() {
               id="ob-dates"
               ref={headingRef}
               tabIndex={-1}
-              className="text-2xl font-semibold t-primary outline-none"
+              className="page-title outline-none"
             >
               When does your Winter Arc begin?
             </h1>
@@ -238,7 +238,7 @@ export function OnboardingFlow() {
               id="ob-phases"
               ref={headingRef}
               tabIndex={-1}
-              className="text-2xl font-semibold t-primary outline-none"
+              className="page-title outline-none"
             >
               The 30-day structure
             </h1>
@@ -278,7 +278,7 @@ export function OnboardingFlow() {
               id="ob-systems"
               ref={headingRef}
               tabIndex={-1}
-              className="text-2xl font-semibold t-primary outline-none"
+              className="page-title outline-none"
             >
               Your daily systems
             </h1>
@@ -421,7 +421,7 @@ export function OnboardingFlow() {
               id="ob-distractions"
               ref={headingRef}
               tabIndex={-1}
-              className="text-2xl font-semibold t-primary outline-none"
+              className="page-title outline-none"
             >
               Distractions & limits
             </h1>
@@ -482,7 +482,7 @@ export function OnboardingFlow() {
               id="ob-review"
               ref={headingRef}
               tabIndex={-1}
-              className="text-2xl font-semibold t-primary outline-none"
+              className="page-title outline-none"
             >
               Your Winter Arc
             </h1>

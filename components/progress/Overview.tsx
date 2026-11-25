@@ -198,7 +198,7 @@ export function Overview({
           )}
           <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden mt-3">
             <div
-              className="h-full rounded-full bg-[#7C8CF8]"
+              className="h-full rounded-full bg-brand"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -231,15 +231,16 @@ export function Overview({
       {/* dimension summaries */}
       <section aria-label="Dimensions">
         <h2 className="section-title mb-2">By area</h2>
-        <div className="surface card-pad flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#242932] !py-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {dims.map((d) => (
             <button
               key={d.id}
               onClick={() => onSelectTab(d.id)}
-              className="flex items-center justify-between gap-3 py-3 text-left touch-manipulation"
+              className="area-tile touch-manipulation"
             >
-              <span className="text-sm font-medium t-primary">{d.label}</span>
-              <span className="text-xs t-secondary text-right tabular-nums">
+              <span className="section-title">{d.label}</span>
+              <span className="text-brand" aria-hidden="true">↗</span>
+              <span className="col-span-2 text-sm t-secondary tabular-nums">
                 {d.summary}
               </span>
             </button>

@@ -25,14 +25,14 @@ export function PhaseOverview({ phases }: { phases: ResolvedPhase[] }) {
           aria-label={`${p.def.name} phase, days ${p.def.startDay} to ${p.def.endDay}, ${p.state}`}
           className={`rounded-xl border px-3 py-2.5 ${
             p.state === "current"
-              ? "border-[#7C8CF8]/50 bg-[#7C8CF8]/5"
+              ? "border-brand/50 bg-brand/5"
               : "hairline"
           }`}
         >
           <p className="text-xs font-semibold t-primary flex items-center gap-1.5">
             {p.state === "current" && (
               <span
-                className="inline-block w-1.5 h-1.5 rounded-full bg-[#7C8CF8] shrink-0"
+                className="inline-block w-1.5 h-1.5 rounded-full bg-brand shrink-0"
                 aria-hidden
               />
             )}

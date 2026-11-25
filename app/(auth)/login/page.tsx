@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AuthFrame } from "@/components/identity";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -34,18 +35,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh app-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <p className="text-2xl font-semibold t-primary tracking-tight">
-            ❄ Winter Arc
-          </p>
-          <p className="text-sm t-secondary mt-2">
-            Your personal 30-day command center.
-          </p>
-        </div>
-        <form onSubmit={onSubmit} className="surface card-pad flex flex-col gap-4">
-          <h1 className="text-lg font-semibold t-primary">Sign in</h1>
+    <AuthFrame>
+        <form onSubmit={onSubmit} className="flex flex-col gap-5">
+          <h1 className="page-title">Sign in</h1>
           <Field label="Email">
             <input
               className="input"
@@ -78,12 +70,11 @@ export default function LoginPage() {
           </button>
           <p className="text-sm t-secondary text-center">
             New here?{" "}
-            <Link href="/signup" className="text-[#5A6AE0] dark:text-[#AAB6FF] font-medium">
+            <Link href="/signup" className="text-brand font-medium">
               Create an account
             </Link>
           </p>
         </form>
-      </div>
-    </div>
+    </AuthFrame>
   );
 }

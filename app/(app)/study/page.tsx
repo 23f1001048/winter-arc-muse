@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { todayKey } from "@/lib/dates";
 import {
   EmptyState,
   ErrorState,
@@ -42,10 +43,10 @@ export default function StudyPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="journal-heading flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="page-title">Study</h1>
-          <p className="page-sub">What you study, and how long it actually took.</p>
+          <p className="page-sub">{subjects.filter((s) => s.is_active).length} active subjects · {sessions.filter((s) => s.session_date === todayKey()).length} sessions today</p>
         </div>
         <button className="btn-primary shrink-0" onClick={() => setAddingSubject(true)}>
           + Subject

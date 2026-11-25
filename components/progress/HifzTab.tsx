@@ -105,7 +105,7 @@ export function HifzTab({ data, range }: { data: ProgressData; range: Range }) {
         {weekly.length === 0 ? (
           <p className="text-sm t-secondary">No recorded weeks in range.</p>
         ) : (
-          <div className="flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#242932]">
+          <div className="flex flex-col divide-y divide-line">
             {weekly.map((w) => (
               <div
                 key={w.week}

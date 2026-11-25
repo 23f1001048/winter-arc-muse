@@ -345,7 +345,7 @@ export function EventForm({
       <label className="flex items-center gap-2.5 text-sm t-primary cursor-pointer touch-manipulation select-none">
         <input
           type="checkbox"
-          className="w-5 h-5 accent-[#5A6AE0] shrink-0"
+          className="w-5 h-5 accent-brand shrink-0"
           checked={allDay}
           onChange={(e) => onToggleAllDay(e.target.checked)}
         />

@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Wordmark } from "@/components/identity";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { engine } from "@/lib/sync/engine";
 import { hasCompletedOnboarding } from "@/lib/onboarding";
 import { ConnectivityBadge } from "@/components/sync/status";
-import { LoadingBlock } from "@/components/ui";
+import { LoadingBlock, Modal } from "@/components/ui";
 
 /** Inline SVG nav icon: 24px viewBox, 1.5px stroke, currentColor, no deps. */
 function NavIcon({
@@ -106,11 +107,13 @@ function NavLink({
   label,
   icon,
   vertical,
+  onNavigate,
 }: {
   href: string;
   label: string;
   icon: ReactNode;
   vertical?: boolean;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
   const active =
@@ -118,20 +121,18 @@ function NavLink({
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={[
         "flex items-center gap-3 rounded-xl text-sm font-medium transition-colors touch-manipulation",
-        // Mobile: fluid widths (flex-1, no min-width) so 7 items always fit 320px viewports.
-        vertical ? "flex-col gap-1 px-1 py-2 flex-1 min-w-0" : "px-4 py-3",
-        active
-          ? "bg-[#5A6AE0]/15 text-[#3D4AC4] dark:text-[#C3CCFF]"
-          : "t-secondary hover:t-primary hover:bg-black/5 dark:hover:bg-white/5",
+        "journal-nav",
+        vertical ? "flex-1 min-w-0 flex-col !gap-1 px-1 py-2" : "px-4 py-3",
       ].join(" ")}
     >
       <NavIcon className={vertical ? "h-[18px] w-[18px] shrink-0" : "h-5 w-5 shrink-0"}>
         {icon}
       </NavIcon>
-      <span className={vertical ? "text-[10px] whitespace-nowrap" : ""}>{label}</span>
+      <span className={vertical ? "text-xs whitespace-nowrap" : ""}>{label}</span>
     </Link>
   );
 }
@@ -141,6 +142,10 @@ export function AppShell({
 }: {
   children: ReactNode;
 }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const pathname = usePathname();
+  const primary = NAV.filter((n) => ["/calendar", "/habits", "/progress"].includes(n.href));
+  const secondary = NAV.filter((n) => !primary.includes(n));
   useEffect(() => {
     engine.start();
   }, []);
@@ -148,12 +153,9 @@ export function AppShell({
     <OnboardingGate>
       <div className="min-h-dvh app-bg">
       {/* Desktop: left navigation */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col border-r hairline surface-flat px-4 py-6">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col border-r hairline surface-flat px-4 py-7">
         <Link href="/calendar" className="px-2 mb-8">
-          <p className="text-lg font-semibold t-primary tracking-tight">
-            ❄ Winter Arc
-          </p>
-          <p className="text-xs t-secondary mt-0.5">30-Day Transformation</p>
+          <Wordmark />
         </Link>
         <nav className="flex flex-col gap-1" aria-label="Primary">
           {NAV.map((n) => (
@@ -169,10 +171,7 @@ export function AppShell({
       <header className="md:hidden sticky top-0 z-40 surface-flat border-b hairline-b px-4 py-3 backdrop-blur">
         <div className="flex items-center justify-between">
           <Link href="/calendar" className="flex items-baseline gap-2">
-            <p className="text-base font-semibold t-primary tracking-tight">
-              ❄ Winter Arc
-            </p>
-            <p className="text-[11px] t-secondary">30-Day Transformation</p>
+            <Wordmark />
           </Link>
           <ConnectivityBadge />
         </div>
@@ -180,7 +179,7 @@ export function AppShell({
 
       {/* Content */}
       <main className="md:pl-60 pb-28 md:pb-12">
-        <div className="mx-auto max-w-3xl px-4 pt-5 sm:pt-8">{children}</div>
+        <div className="mx-auto max-w-5xl px-4 pt-5 sm:px-8 sm:pt-9">{children}</div>
       </main>
 
       {/* Mobile: bottom navigation */}
@@ -190,11 +189,23 @@ export function AppShell({
         style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
       >
         <div className="flex justify-between">
-          {NAV.map((n) => (
-            <NavLink key={n.href} {...n} vertical />
-          ))}
+          {primary.map((n) => <NavLink key={n.href} {...n} vertical />)}
+          <button type="button" aria-haspopup="dialog" aria-expanded={moreOpen}
+            data-current={secondary.some((n) => pathname.startsWith(n.href))}
+            className="journal-nav flex flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-xs font-medium"
+            onClick={() => setMoreOpen(true)}>
+            <NavIcon className="h-[18px] w-[18px]"><circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" /></NavIcon>
+            More
+          </button>
         </div>
       </nav>
+      {moreOpen && (
+        <Modal title="More sections" onClose={() => setMoreOpen(false)}>
+          <nav aria-label="More sections" className="grid grid-cols-2 gap-2">
+            {secondary.map((n) => <NavLink key={n.href} {...n} onNavigate={() => setMoreOpen(false)} />)}
+          </nav>
+        </Modal>
+      )}
     </div>
     </OnboardingGate>
   );

@@ -71,7 +71,7 @@ export function SubjectForm({
           type="checkbox"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
-          className="w-5 h-5 accent-[#5A6AE0]"
+          className="w-5 h-5 accent-brand"
         />
         Active
       </label>

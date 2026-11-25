@@ -67,7 +67,7 @@ export function MonthView({
               aria-label={`${formatShort(d)}: ${items} ${items === 1 ? "item" : "items"}, ${done} done`}
               className={`flex flex-col items-center rounded-lg py-1.5 min-h-[48px] transition-colors touch-manipulation ${
                 today
-                  ? "bg-[#5A6AE0]/15"
+                  ? "bg-brand/15"
                   : inMonth
                     ? "hover:bg-black/5 dark:hover:bg-white/5"
                     : "opacity-30"
@@ -75,14 +75,14 @@ export function MonthView({
             >
               <span
                 className={`w-7 h-7 flex items-center justify-center rounded-full text-[13px] ${
-                  today ? "bg-[#5A6AE0] text-white font-semibold" : "t-primary"
+                  today ? "bg-brand text-on-brand font-semibold" : "t-primary"
                 }`}
               >
                 {Number(d.slice(8))}
               </span>
               <span className="flex gap-0.5 mt-0.5 h-1.5">
                 {items > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#7C8CF8]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                 )}
                 {done > 0 && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -97,7 +97,7 @@ export function MonthView({
       </p>
       <p className="text-[11px] t-faint mt-2 text-center">
         <span className="inline-flex items-center gap-1 mr-4">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#7C8CF8]" aria-hidden="true" />
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand" aria-hidden="true" />
           Items
         </span>
         <span className="inline-flex items-center gap-1">

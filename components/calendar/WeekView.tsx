@@ -50,14 +50,14 @@ export function WeekView({
               onClick={() => onSelectDay(d)}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 sm:py-3 transition-colors touch-manipulation ${
                 today
-                  ? "bg-[#5A6AE0]/15"
+                  ? "bg-brand/15"
                   : "hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
               <span className="text-[11px] t-faint">{DOW[i]}</span>
               <span
                 className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium ${
-                  today ? "bg-[#5A6AE0] text-white" : "t-primary"
+                  today ? "bg-brand text-on-brand" : "t-primary"
                 }`}
               >
                 {Number(d.slice(8))}
@@ -88,7 +88,7 @@ export function WeekView({
                   className="flex items-center gap-2 text-sm min-w-0"
                 >
                   <span
-                    className="w-1 self-stretch rounded-full bg-[#7C8CF8] shrink-0"
+                    className="w-1 self-stretch rounded-full bg-brand shrink-0"
                     aria-hidden
                   />
                   <span className="t-primary truncate flex-1 min-w-0">

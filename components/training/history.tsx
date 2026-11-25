@@ -122,7 +122,7 @@ export function TrainingHistory({
           <button
             key={s.id}
             onClick={() => setOpen(s)}
-            className="surface card-pad !p-3 flex items-center gap-3 text-left hover:border-[#7C8CF8]/50 transition-colors"
+            className="surface card-pad !p-3 flex items-center gap-3 text-left hover:border-brand/50 transition-colors"
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium t-primary">

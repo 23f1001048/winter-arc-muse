@@ -32,7 +32,7 @@ function QuickButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="surface-elevated rounded-2xl px-3 py-3.5 text-sm font-medium t-primary text-center transition-colors hover:border-[#7C8CF8]/60 active:scale-[0.98] touch-manipulation min-h-[56px] disabled:opacity-50"
+      className="surface-elevated rounded-2xl px-3 py-3.5 text-sm font-medium t-primary text-center transition-colors hover:border-brand/60 active:scale-[0.98] touch-manipulation min-h-[56px] disabled:opacity-50"
     >
       {label}
     </button>
@@ -165,7 +165,7 @@ export function TodayPanel({
     <div className="flex flex-col gap-4">
       {flash && (
         <div
-          className="surface-elevated card-pad text-sm text-center t-primary border-[#7C8CF8]/50"
+          className="surface-elevated card-pad text-sm text-center t-primary border-brand/50"
           role="status"
         >
           {flash}
@@ -173,12 +173,12 @@ export function TodayPanel({
       )}
 
       {/* quick actions */}
-      <section aria-label="Quick actions">
+      <section id="quick-actions" aria-label="Quick actions">
         <h3 className="section-title mb-2">Quick actions</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <QuickButton
             label={meditationDone ? "✓ Meditation" : "Meditation"}
-            disabled={busy}
+            disabled={busy || !meditation}
             onClick={() =>
               meditation &&
               run(
@@ -208,7 +208,7 @@ export function TodayPanel({
             }
           />
         </div>
-        <div className="grid grid-cols-3 gap-2 mt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
           <div className="surface card-pad !p-3">
             <p className="text-xs t-secondary mb-1.5">Hifz · {hifzToday} ayahs</p>
             <div className="flex flex-wrap gap-1.5">
@@ -505,7 +505,7 @@ export function TodayPanel({
                   <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        over ? "bg-red-500" : "bg-[#7C8CF8]"
+                        over ? "bg-red-500" : "bg-brand"
                       }`}
                       style={{ width: `${pct}%` }}
                     />
