@@ -115,7 +115,7 @@ export function TrainingTab({
                   onClick={() => setSelectedId(e.exerciseId)}
                   className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium min-h-[40px] touch-manipulation border transition-colors ${
                     selected?.exerciseId === e.exerciseId
-                      ? "bg-[#5A6AE0]/15 text-[#3D4AC4] dark:text-[#C3CCFF] border-[#5A6AE0]/30"
+                      ? "bg-brand/15 text-brand border-brand/30"
                       : "t-secondary border-transparent hover:t-primary"
                   }`}
                 >
@@ -175,7 +175,7 @@ export function TrainingTab({
         {sessions.length === 0 ? (
           <p className="text-sm t-secondary">No sessions in this range.</p>
         ) : (
-          <div className="surface card-pad flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#242932] !py-1">
+          <div className="surface card-pad flex flex-col divide-y divide-line !py-1">
             {sessions.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-3 py-2.5">
                 <div className="min-w-0">

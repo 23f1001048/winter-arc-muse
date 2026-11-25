@@ -124,7 +124,7 @@ export function WeeklySummary({
       {out.length === 0 ? (
         <p className="text-sm t-secondary">No recorded activity this week.</p>
       ) : (
-        <div className="divide-y divide-[#E5E7EB] dark:divide-[#242932]">
+        <div className="divide-y divide-line">
           {out.map((r) => (
             <Row key={r.label} label={r.label} value={r.value} />
           ))}

@@ -242,8 +242,8 @@ function ProgressInner() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="page-title">Transformation</h1>
-        <p className="page-sub">What happened — recorded, not rated.</p>
+        <h1 className="page-title">Progress</h1>
+        <p className="page-sub">Explore your activity by date and tracking area.</p>
       </div>
 
       <RangeControl

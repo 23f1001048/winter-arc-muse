@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AuthFrame } from "@/components/identity";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -42,16 +43,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-dvh app-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <p className="text-2xl font-semibold t-primary tracking-tight">
-            ❄ Winter Arc
-          </p>
-          <p className="text-sm t-secondary mt-2">
-            Begin your 30-day transformation.
-          </p>
-        </div>
+    <AuthFrame>
         {sent ? (
           <div className="surface card-pad text-center">
             <p className="font-medium t-primary">Check your inbox</p>
@@ -61,8 +53,8 @@ export default function SignupPage() {
             </p>
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="surface card-pad flex flex-col gap-4">
-            <h1 className="text-lg font-semibold t-primary">Create account</h1>
+          <form onSubmit={onSubmit} className="flex flex-col gap-5">
+            <h1 className="page-title">Create account</h1>
             <Field label="Email">
               <input
                 className="input"
@@ -96,13 +88,12 @@ export default function SignupPage() {
             </button>
             <p className="text-sm t-secondary text-center">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#5A6AE0] dark:text-[#AAB6FF] font-medium">
+              <Link href="/login" className="text-brand font-medium">
                 Sign in
               </Link>
             </p>
           </form>
         )}
-      </div>
-    </div>
+    </AuthFrame>
   );
 }

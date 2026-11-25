@@ -67,7 +67,7 @@ export function Sparkline({
           key={si}
           points={pts}
           fill="none"
-          stroke="#7C8CF8"
+          stroke="rgb(var(--brand))"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -79,8 +79,8 @@ export function Sparkline({
           cx={x(p.i)}
           cy={y(p.value)}
           r="3"
-          fill="#7C8CF8"
-          stroke="#0B0D10"
+          fill="rgb(var(--brand))"
+          stroke="var(--canvas)"
           strokeWidth="1"
         >
           <title>{`${p.label || p.date}: ${p.value}`}</title>
@@ -137,7 +137,7 @@ export function TrendBars({
                 width={bw}
                 height={bh}
                 rx={3}
-                fill={it.value > 0 ? "#7C8CF8" : "#7C8CF8"}
+                fill={it.value > 0 ? "rgb(var(--brand))" : "rgb(var(--brand))"}
                 opacity={it.value > 0 ? 0.85 : 0.25}
               >
                 <title>{`${it.label}: ${formatValue ? formatValue(it.value) : it.value}`}</title>
@@ -172,7 +172,7 @@ export function RatioBar({ pct }: { pct: number }) {
       aria-label={`${clamped} percent`}
     >
       <div
-        className="h-full rounded-full bg-[#7C8CF8]"
+        className="h-full rounded-full bg-brand"
         style={{ width: `${clamped}%` }}
       />
     </div>

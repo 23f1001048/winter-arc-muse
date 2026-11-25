@@ -9,6 +9,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: "rgb(var(--brand) / <alpha-value>)",
+        "on-brand": "var(--on-brand)",
+        line: "rgb(var(--line) / <alpha-value>)",
         // Dark-first surfaces (spec §3)
         ink: {
           bg: "#0B0D10",

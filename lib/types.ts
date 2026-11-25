@@ -341,18 +341,14 @@ export interface ReadingLog {
 // ---------------------------------------------------------------------------
 
 export function challengeDayNumber(challenge: Challenge, onDate: Date): number {
-  const start = startOfLocalDay(new Date(challenge.start_date + "T00:00:00"));
-  const day = startOfLocalDay(onDate);
-  const diff = Math.floor((day.getTime() - start.getTime()) / 86_400_000);
-  return diff + 1; // Day 1 = start date
+  const start = new Date(challenge.start_date + "T00:00:00");
+  return 1 + (localDayStamp(onDate) - localDayStamp(start)) / 86_400_000;
 }
 
 export function daysRemaining(challenge: Challenge, onDate: Date): number {
   return Math.max(0, challenge.duration_days - challengeDayNumber(challenge, onDate) + 1);
 }
 
-function startOfLocalDay(d: Date): Date {
-  const c = new Date(d);
-  c.setHours(0, 0, 0, 0);
-  return c;
+function localDayStamp(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
 }

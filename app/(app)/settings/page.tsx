@@ -231,11 +231,14 @@ export default function SettingsPage() {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="page-title">Settings</h1>
-        <p className="page-sub">Appearance, profile, challenge, integrations, and data.</p>
+        <nav aria-label="Settings sections" className="day-shortcuts mt-4">
+          <a href="#appearance">Appearance</a><a href="#profile">Profile</a>
+          <a href="#challenge">Challenge</a><a href="#calendar-connection">Calendar</a><a href="#data">Data</a>
+        </nav>
       </div>
 
       {/* appearance */}
-      <section className="surface card-pad" aria-label="Appearance">
+      <section className="surface card-pad" id="appearance" aria-label="Appearance">
         <h2 className="section-title mb-3">Appearance</h2>
         <SegControl<Appearance>
           ariaLabel="Appearance"
@@ -251,7 +254,7 @@ export default function SettingsPage() {
       </section>
 
       {/* profile */}
-      <section className="surface card-pad" aria-label="Profile">
+      <section className="surface card-pad" id="profile" aria-label="Profile">
         <h2 className="section-title mb-3">Profile</h2>
         <div className="flex flex-col gap-3">
           <Field label="Email">
@@ -288,7 +291,7 @@ export default function SettingsPage() {
       </section>
 
       {/* challenge */}
-      <section className="surface card-pad" aria-label="Challenge">
+      <section className="surface card-pad" id="challenge" aria-label="Challenge">
         <h2 className="section-title mb-3">Challenge</h2>
         {challenge && !editingChallenge ? (
           <div className="flex flex-col gap-3">
@@ -342,10 +345,10 @@ export default function SettingsPage() {
       </section>
 
       {/* google calendar integration */}
-      <GoogleCalendarSection />
+      <div id="calendar-connection"><GoogleCalendarSection /></div>
 
       {/* data */}
-      <section className="surface card-pad" aria-label="Data">
+      <section className="surface card-pad" id="data" aria-label="Data">
         <h2 className="section-title mb-3">Data</h2>
         <p className="text-sm t-secondary mb-4">
           Your data lives in your own Supabase project, protected by row-level

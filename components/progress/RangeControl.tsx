@@ -53,7 +53,7 @@ export function RangeControl({
               onClick={() => onPreset(p.id)}
               className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors min-h-[40px] touch-manipulation disabled:opacity-40 ${
                 active
-                  ? "bg-[#5A6AE0]/15 text-[#3D4AC4] dark:text-[#C3CCFF] border border-[#5A6AE0]/30"
+                  ? "bg-brand/15 text-brand border border-brand/30"
                   : "t-secondary border border-transparent hover:t-primary"
               }`}
             >

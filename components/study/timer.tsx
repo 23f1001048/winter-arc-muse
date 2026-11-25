@@ -206,7 +206,7 @@ export function StudyTimer({
             <p className="text-sm t-secondary mt-0.5">{timerTopic.name}</p>
           )}
         </div>
-        <p className="text-5xl font-semibold t-primary tabular-nums tracking-tight">
+        <p className="timer-readout tabular-nums">
           {formatHMS(elapsedMs / 1000)}
         </p>
         {/* State changes only — never the ticking display. */}

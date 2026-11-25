@@ -28,8 +28,8 @@ test("manifest is valid, complete, and all icons resolve with correct sizes", ()
   assert.equal(m.start_url, "/");
   assert.equal(m.scope, "/");
   assert.equal(m.display, "standalone");
-  assert.equal(m.theme_color, "#0B0D10");
-  assert.equal(m.background_color, "#0B0D10");
+  assert.equal(m.theme_color, "#101610");
+  assert.equal(m.background_color, "#101610");
   assert.ok(Array.isArray(m.icons) && m.icons.length >= 2);
   const sizes = m.icons.map((i) => i.sizes);
   assert.ok(sizes.includes("192x192"), "needs a 192 icon");

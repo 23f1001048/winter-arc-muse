@@ -114,7 +114,7 @@ export function ReadingTab({
                 onClick={() => setBookId(b.bookId ?? "__none__")}
                 className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium min-h-[40px] touch-manipulation border transition-colors ${
                   active
-                    ? "bg-[#5A6AE0]/15 text-[#3D4AC4] dark:text-[#C3CCFF] border-[#5A6AE0]/30"
+                    ? "bg-brand/15 text-brand border-brand/30"
                     : "t-secondary border-transparent hover:t-primary"
                 }`}
               >
@@ -133,7 +133,7 @@ export function ReadingTab({
             {history.length === 0 ? (
               <p className="text-xs t-faint mt-3">No logs in this range.</p>
             ) : (
-              <div className="mt-3 flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#242932]">
+              <div className="mt-3 flex flex-col divide-y divide-line">
                 {history.map((l) => (
                   <div
                     key={l.id}

@@ -58,12 +58,12 @@ function offlineFallback() {
     "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" +
     "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
     "<title>Winter Arc — Offline</title>" +
-    "<style>body{background:#0B0D10;color:#E8EAF0;font-family:system-ui,sans-serif;" +
+    "<style>body{background:#101610;color:#E8EAF0;font-family:system-ui,sans-serif;" +
     "display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}" +
     ".c{text-align:center;padding:2rem;max-width:22rem}" +
     "h1{font-size:1.1rem;font-weight:600;margin:0 0 .5rem}" +
     "p{font-size:.85rem;color:#9BA3AF;margin:0 0 1.25rem}" +
-    "button{background:#5A6AE0;color:#fff;border:0;border-radius:.75rem;" +
+    "button{background:#cdeb89;color:#1b2912;border:0;border-radius:.75rem;" +
     "padding:.65rem 1.4rem;font-size:.9rem;cursor:pointer}</style></head>" +
     "<body><div class=\"c\"><h1>\u2744 Winter Arc</h1>" +
     "<p>You're offline and this page hasn't been opened before. " +

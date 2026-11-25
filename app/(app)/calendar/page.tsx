@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCalendarData } from "@/components/calendar/useCalendarData";
 import { useTraining } from "@/components/training/useTraining";
 import { DayView } from "@/components/calendar/DayView";
@@ -8,13 +8,9 @@ import { WeekView } from "@/components/calendar/WeekView";
 import { MonthView } from "@/components/calendar/MonthView";
 import { PlanTomorrow } from "@/components/calendar/PlanTomorrow";
 import { EmptyState, ErrorState, LoadingBlock, SegControl } from "@/components/ui";
-import { addDays, formatLong, isToday, todayKey } from "@/lib/dates";
-import { challengeDayNumber, daysRemaining } from "@/lib/types";
-import {
-  currentChallengePhase,
-  resolveChallengePhases,
-} from "@/lib/phases";
-import { PhaseOverview } from "@/components/challenge/PhaseOverview";
+import { addDays, addMonthsClamped, isToday, todayKey, validDayKey } from "@/lib/dates";
+import { useSearchParams } from "next/navigation";
+import { ChallengeCalendar } from "@/components/challenge/ChallengeCalendar";
 import { engine } from "@/lib/sync/engine";
 import { GoogleCalendarProvider } from "@/lib/calendar-providers/google";
 import { triggerGoogleSync } from "@/lib/calendar-providers/googleSyncClient";
@@ -33,8 +29,18 @@ function rangeFor(view: View, dateKey: string): [string, string] {
 }
 
 export default function CalendarPage() {
+  return <Suspense fallback={<LoadingBlock />}><CalendarEntry /></Suspense>;
+}
+
+function CalendarEntry() {
+  const date = useSearchParams().get("date");
+  const initialDate = validDayKey(date) ? date : todayKey();
+  return <Calendar key={date ?? "today"} initialDate={initialDate} />;
+}
+
+function Calendar({ initialDate }: { initialDate: string }) {
   const [view, setView] = useState<View>("day");
-  const [dateKey, setDateKey] = useState(todayKey());
+  const [dateKey, setDateKey] = useState(initialDate);
   const [planning, setPlanning] = useState(false);
 
   const [startKey, endKey] = useMemo(
@@ -86,82 +92,22 @@ export default function CalendarPage() {
   }, []);
 
   const challenge = data.challenge;
-  const dayNumber =
-    challenge && dateKey === todayKey()
-      ? challengeDayNumber(challenge, new Date())
-      : null;
-  const remaining =
-    challenge && dateKey === todayKey()
-      ? daysRemaining(challenge, new Date())
-      : null;
-  // V4.6: current phase + overview, derived from the challenge dates.
-  // Shown only for the standard 30-day challenge; null otherwise.
-  const phaseNow =
-    challenge && dateKey === todayKey()
-      ? currentChallengePhase(challenge, new Date())
-      : null;
-  const phases =
-    challenge && dateKey === todayKey()
-      ? resolveChallengePhases(challenge, new Date())
-      : null;
+  function selectDay(key: string) {
+    setDateKey(key);
+    setView("day");
+  }
+
+  function moveDate(direction: number) {
+    setDateKey((current) => view === "month" ? addMonthsClamped(current, direction)
+      : addDays(current, direction * (view === "week" ? 7 : 1)));
+  }
 
   return (
     <div className="flex flex-col gap-4">
       {/* challenge banner */}
-      <section aria-label="Challenge" className="surface card-pad">
-        {data.loading ? (
-          <div className="flex items-center gap-3">
-            <LoadingBlock label="" />
-          </div>
-        ) : challenge ? (
-          <>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] t-faint">
-                {challenge.title}
-              </p>
-              {dayNumber !== null && dayNumber >= 1 ? (
-                <p className="page-title mt-1">
-                  Day {Math.min(dayNumber, challenge.duration_days)} of{" "}
-                  {challenge.duration_days}
-                </p>
-              ) : (
-                <p className="page-title mt-1">
-                  Starts {formatLong(challenge.start_date)}
-                </p>
-              )}
-              <p className="page-sub">
-                {challenge.subtitle ?? "Build the person you want to become."}
-                {remaining !== null && remaining > 0 && dayNumber !== null && dayNumber >= 1
-                  ? ` · ${remaining} day${remaining === 1 ? "" : "s"} remaining`
-                  : ""}
-              </p>
-              {/* V4.6: current phase — contextual, compact, date-derived. */}
-              {phaseNow && (
-                <p className="text-xs t-secondary mt-1.5" aria-label={`Current phase: ${phaseNow.def.name}`}>
-                  <span className="font-semibold uppercase tracking-[0.14em] t-primary">
-                    {phaseNow.def.name}
-                  </span>
-                  <span className="t-faint">
-                    {" "}· Days {phaseNow.def.startDay}–{phaseNow.def.endDay}
-                  </span>
-                  <span className="block mt-0.5 t-faint">
-                    {phaseNow.def.description}
-                  </span>
-                </p>
-              )}
-            </div>
-            <button
-              className="btn-primary shrink-0"
-              onClick={() => setPlanning(true)}
-            >
-              Plan tomorrow
-            </button>
-          </div>
-          {/* V4.6: phase overview — all four phases, date-based state. */}
-          {phases && <PhaseOverview phases={phases} />}
-          </>
-        ) : (
+      {data.loading ? <LoadingBlock label="Loading your calendar…" /> : challenge ? (
+        <ChallengeCalendar challenge={challenge} selected={dateKey} onSelect={selectDay} onPlan={() => setPlanning(true)} />
+      ) : data.error ? null : (
           <EmptyState
             title="No active challenge"
             body="Create your 30-day challenge to anchor everything around it."
@@ -171,8 +117,7 @@ export default function CalendarPage() {
               </Link>
             }
           />
-        )}
-      </section>
+      )}
 
       {/* view controls */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -189,7 +134,7 @@ export default function CalendarPage() {
         <div className="flex items-center gap-2">
           <button
             className="btn-ghost !px-3"
-            onClick={() => setDateKey(addDays(dateKey, view === "month" ? -30 : view === "week" ? -7 : -1))}
+            onClick={() => moveDate(-1)}
             aria-label="Previous"
           >
             ←
@@ -201,7 +146,7 @@ export default function CalendarPage() {
           )}
           <button
             className="btn-ghost !px-3"
-            onClick={() => setDateKey(addDays(dateKey, view === "month" ? 30 : view === "week" ? 7 : 1))}
+            onClick={() => moveDate(1)}
             aria-label="Next"
           >
             →
@@ -211,29 +156,21 @@ export default function CalendarPage() {
 
       {data.error ? (
         <ErrorState message={data.error} onRetry={data.refresh} />
-      ) : data.loading ? (
-        <LoadingBlock />
-      ) : view === "day" ? (
+      ) : data.loading ? null : view === "day" ? (
         <DayView dateKey={dateKey} data={data} training={training} />
       ) : view === "week" ? (
         <WeekView
           dateKey={dateKey}
           data={data}
           training={training}
-          onSelectDay={(k) => {
-            setDateKey(k);
-            setView("day");
-          }}
+          onSelectDay={selectDay}
         />
       ) : (
         <MonthView
           dateKey={dateKey}
           data={data}
           training={training}
-          onSelectDay={(k) => {
-            setDateKey(k);
-            setView("day");
-          }}
+          onSelectDay={selectDay}
         />
       )}
 

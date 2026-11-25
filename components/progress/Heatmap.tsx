@@ -7,9 +7,9 @@ import type { DayCounts, HeatDay } from "./types";
 
 const LEVEL_BG = [
   "bg-black/[0.05] dark:bg-white/[0.07] hover:bg-black/10 dark:hover:bg-white/15",
-  "bg-[#7C8CF8]/25 hover:bg-[#7C8CF8]/40",
-  "bg-[#7C8CF8]/60 hover:bg-[#7C8CF8]/75",
-  "bg-[#7C8CF8] hover:bg-[#8C9CFF]",
+  "bg-brand/25 hover:bg-brand/40",
+  "bg-brand/60 hover:bg-brand/75",
+  "bg-brand hover:bg-brand",
 ];
 
 const LEGEND: { level: 0 | 1 | 2 | 3; label: string }[] = [
@@ -70,8 +70,7 @@ export function Heatmap({
     <section aria-label="Activity heatmap" className="surface card-pad">
       <h2 className="section-title">Last 30 days</h2>
       <p className="text-xs t-faint mt-1">
-        Presence per area — habits, study, training, hifz, reading, journal.
-        An empty day is just unrecorded, not a failure.
+        Select a day to see what you recorded.
       </p>
 
       <div className="overflow-x-auto mt-3">
@@ -89,7 +88,7 @@ export function Heatmap({
                     aria-pressed={selected === d.date}
                     className={`w-7 h-7 rounded-md transition-colors touch-manipulation ${LEVEL_BG[d.level]} ${
                       selected === d.date
-                        ? "ring-2 ring-[#7C8CF8] ring-offset-1 ring-offset-transparent"
+                        ? "ring-2 ring-brand ring-offset-1 ring-offset-transparent"
                         : ""
                     }`}
                   />
@@ -114,7 +113,7 @@ export function Heatmap({
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium t-primary">{formatLong(detail.date)}</p>
             <Link
-              href="/calendar"
+              href={`/calendar?date=${detail.date}`}
               className="text-xs t-secondary hover:t-primary underline underline-offset-2"
             >
               Open in calendar →

@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
 import { PwaRegister } from "@/components/pwa-register";
+
+const journal = localFont({
+  src: "./fonts/InstrumentSerif-Regular.ttf",
+  variable: "--font-journal",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Winter Arc — 30-Day Transformation",
@@ -28,7 +35,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0B0D10",
+  themeColor: "#101610",
 };
 
 // Avoids a theme flash: applies stored (or default dark) appearance before paint.
@@ -40,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${journal.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

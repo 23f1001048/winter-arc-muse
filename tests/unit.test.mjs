@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 
 import {
   addDays,
+  addMonthsClamped,
+  validDayKey,
   formatDuration,
   formatHMS,
   timeLabel,
@@ -260,4 +262,14 @@ test("sessionsInRange: inclusive bounds", () => {
   ];
   const got = sessionsInRange(sessions, "2026-10-01", "2026-10-04").map((s) => s.id);
   assert.deepEqual(got, ["x", "y"]);
+});
+
+test("calendar navigation clamps month ends and validates deep links", () => {
+  assert.equal(addMonthsClamped("2024-01-31", 1), "2024-02-29");
+  assert.equal(addMonthsClamped("2025-03-31", -1), "2025-02-28");
+  assert.equal(addMonthsClamped("2025-12-31", 1), "2026-01-31");
+  assert.ok(validDayKey("2024-02-29"));
+  for (const value of [null, "", "2025-02-29", "2025-13-01", "2025-1-1"]) {
+    assert.equal(validDayKey(value), false);
+  }
 });

@@ -121,11 +121,11 @@ export default function HabitsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="journal-heading flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="page-title">Habits</h1>
           <p className="page-sub">
-            Routines, abstinence, and limits — all editable.
+            {habits.filter((h) => h.is_active).length} active habits · {habits.filter((h) => h.is_active && logFor(h.id)?.status === "done").length} logged today
           </p>
         </div>
       </div>
