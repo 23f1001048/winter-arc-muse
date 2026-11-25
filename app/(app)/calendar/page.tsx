@@ -106,7 +106,7 @@ function Calendar({ initialDate }: { initialDate: string }) {
     <div className="flex flex-col gap-4">
       {/* challenge banner */}
       {data.loading ? <LoadingBlock label="Loading your calendar…" /> : challenge ? (
-        <ChallengeCalendar challenge={challenge} selected={dateKey} onSelect={selectDay} onPlan={() => setPlanning(true)} />
+        <ChallengeCalendar data={data} challenge={challenge} selected={dateKey} onSelect={selectDay} onPlan={() => setPlanning(true)} />
       ) : data.error ? null : (
           <EmptyState
             title="No active challenge"

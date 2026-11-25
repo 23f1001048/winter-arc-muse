@@ -4,10 +4,14 @@ import { addDays, formatLong, formatShort, parseDayKey, todayKey } from "@/lib/d
 import { challengeDayNumber, type Challenge } from "@/lib/types";
 import { currentChallengePhase, resolveChallengePhases } from "@/lib/phases";
 import { WinterLandscape } from "@/components/identity";
+import Link from "next/link";
+import { HabitPractice } from "./HabitPractice";
+import type { CalendarData } from "@/components/calendar/useCalendarData";
 import { PhaseOverview } from "./PhaseOverview";
 
-export function ChallengeCalendar({ challenge, selected, onSelect, onPlan }: {
+export function ChallengeCalendar({ challenge, selected, onSelect, onPlan, data }: {
   challenge: Challenge;
+  data: CalendarData;
   selected: string;
   onSelect: (date: string) => void;
   onPlan: () => void;
@@ -29,7 +33,7 @@ export function ChallengeCalendar({ challenge, selected, onSelect, onPlan }: {
       <div className="challenge-cover">
         <WinterLandscape />
         <div className="relative max-w-[78%]">
-          <p className="challenge-caption text-[#dae8b6]">{challenge.title}</p>
+          <p className="challenge-caption text-[#dae8b6]">{challenge.title}{selected !== today && day >= 1 && day <= length ? " · Today" : ""}</p>
           <h1 className="display-title mt-2">
             {day < 1 ? "Upcoming challenge" : day > length ? "Challenge complete" : <>Day {day}<span className="text-[.56em]"> of {length}</span></>}
           </h1>
@@ -39,6 +43,17 @@ export function ChallengeCalendar({ challenge, selected, onSelect, onPlan }: {
           {challenge.subtitle && <p className="mt-1 text-sm text-[#e0e7d6]">{challenge.subtitle}</p>}
         </div>
       </div>
+      {phases && selectedDay >= 1 && selectedDay <= length && (
+        <HabitPractice key={challenge.id} challenge={challenge} day={selectedDay} selected={selected} data={data} />
+      )}
+      {phases && (selectedDay < 1 || selectedDay > length) && (
+        <div className="card-pad flex flex-wrap gap-2">
+          <button className="btn-secondary" onClick={() => onSelect(dateFor(selectedDay < 1 ? 1 : length))}>
+            {selectedDay < 1 ? "Preview day 1" : "Revisit day 30"}
+          </button>
+          {day > length && <Link href={`/progress?tab=reflection&date=${dateFor(length)}#challenge-review`} className="btn-primary">Open my 30-day review</Link>}
+        </div>
+      )}
       <div className="card-pad">
         <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
           <h2 className="section-title">Challenge days {first}–{last}</h2>
@@ -65,7 +80,7 @@ export function ChallengeCalendar({ challenge, selected, onSelect, onPlan }: {
           })}
         </div>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
-          {phases && <details className="min-w-0 flex-1"><summary className="cursor-pointer py-3 text-sm font-medium t-secondary">Challenge phases</summary><PhaseOverview phases={phases} /></details>}
+          {phases && <details className="min-w-0 flex-1"><summary className="cursor-pointer py-3 text-sm font-medium t-secondary">See the 30-day plan</summary><PhaseOverview phases={phases} onSelect={onSelect} /></details>}
           <button className="btn-secondary ml-auto" onClick={onPlan}>Plan tomorrow</button>
         </div>
       </div>

@@ -41,7 +41,7 @@ export const CHALLENGE_PHASES: PhaseDef[] = [
     key: "stabilize",
     name: "Stabilize",
     description:
-      "Establish the baseline and make the daily system easy to follow.",
+      "Tie one small habit to something you already do each day.",
     startDay: 1,
     endDay: 7,
   },
@@ -49,14 +49,14 @@ export const CHALLENGE_PHASES: PhaseDef[] = [
     key: "build",
     name: "Build",
     description:
-      "Strengthen consistency across study, training, reading, and routines.",
+      "Repeat at the same cue and make tomorrow’s start easier.",
     startDay: 8,
     endDay: 15,
   },
   {
     key: "discipline",
     name: "Discipline",
-    description: "Execute the system even when motivation is low.",
+    description: "Practice a backup for busy days and a way back after a missed day.",
     startDay: 16,
     endDay: 23,
   },
@@ -64,7 +64,7 @@ export const CHALLENGE_PHASES: PhaseDef[] = [
     key: "identity",
     name: "Identity",
     description:
-      "Turn the systems you've practiced into something you can carry forward.",
+      "Choose the version you want to keep and plan your first repeat after day 30.",
     startDay: 24,
     endDay: 30,
   },

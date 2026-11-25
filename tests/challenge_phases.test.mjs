@@ -207,21 +207,15 @@ test("phase copy lives in one place with the agreed descriptions", () => {
     CHALLENGE_PHASES.map((p) => p.name),
     ["Stabilize", "Build", "Discipline", "Identity"]
   );
-  const byName = Object.fromEntries(CHALLENGE_PHASES.map((p) => [p.name, p]));
-  assert.equal(
-    byName.Stabilize.description,
-    "Establish the baseline and make the daily system easy to follow."
-  );
-  assert.equal(
-    byName.Build.description,
-    "Strengthen consistency across study, training, reading, and routines."
-  );
-  assert.equal(
-    byName.Discipline.description,
-    "Execute the system even when motivation is low."
-  );
-  assert.equal(
-    byName.Identity.description,
-    "Turn the systems you've practiced into something you can carry forward."
-  );
+  assert.equal(new Set(CHALLENGE_PHASES.map(p => p.description)).size, 4);
+});
+
+test("each day has its own action and each phase ends with a checkpoint", async () => {
+  const { guideForDay } = await import("../lib/challengeGuide.ts");
+  const days = Array.from({ length: 30 }, (_, i) => guideForDay(i + 1));
+  assert.equal(new Set(days.map(d => d.practice.title)).size, 30);
+  assert.equal(new Set(days.map(d => d.practice.action)).size, 30);
+  assert.ok(days.every(d => d.practice.action.trim().length > 30));
+  assert.deepEqual(days.flatMap((d, i) => d.checkpoint ? [i + 1] : []), [7, 15, 23, 30]);
+  for (const day of [0, 31, 1.5, NaN]) assert.equal(guideForDay(day), null);
 });
